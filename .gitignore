@@ -1,0 +1,32 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependency directories (in case tooling is added later)
+node_modules/
+
+# Local environment files
+.env
+.env.local
+
+# Build output (in case a bundler is introduced later)
+dist/
+build/
+
+# Personal backups exported from the app — never commit real journal data.
+# Matches the app's own export filename pattern (journal-backup-YYYY-MM-DD.json)
+# plus any similarly-named file, as a safety net.
+journal-backup-*.json
+*backup*.json

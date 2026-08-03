@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Journal</title>
+<meta name="description" content="A personal journal app for daily reflection, mood tracking and self-development.">
+
+<!-- PWA: manifest and theme color -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1E1B2E">
+<meta name="background-color" content="#1E1B2E">
+
+<!-- PWA: iOS-specific (Safari partly ignores manifest.webmanifest) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Journal">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="lockScreen">
+  <div class="lock-box" id="lockBox"></div>
+</div>
+
+<div id="milestoneToast"></div>
+
+<div id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">×</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev">‹</button>
+  <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-nav lightbox-next" id="lightboxNext">›</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+
+<div id="focusModal">
+  <div class="focus-modal-header">
+    <div class="focus-modal-title" data-i18n="write.focusModeTitle">Focus mode</div>
+    <button class="focus-close" id="focusCloseBtn">×</button>
+  </div>
+  <textarea id="focusTextarea" class="focus-textarea" data-i18n-placeholder="write.notesPlaceholder" placeholder="Write freely about your day, thoughts, anything at all..."></textarea>
+  <div class="focus-modal-footer">
+    <div class="word-meter-wrap" style="flex:1; margin-bottom:0;">
+      <div class="word-meter-label"><span id="focusWordCount">0</span><span data-i18n="write.wordCountGoal">Goal: 1000 words</span></div>
+      <div class="word-meter-track"><div class="word-meter-fill" id="focusWordFill" style="width:0%"></div></div>
+    </div>
+    <button class="save-btn" id="focusSaveBtn" style="width:auto; padding:12px 22px;" data-i18n="write.saveButton">Save today's entry</button>
+  </div>
+</div>
+
+<div id="confirmModal" class="confirm-modal">
+  <div class="confirm-box">
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmMessage"></p>
+    <div class="confirm-actions">
+      <button id="confirmCancelBtn" class="confirm-btn confirm-btn-cancel"></button>
+      <button id="confirmActionBtn" class="confirm-btn"></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="appRoot" style="display:none;">
+  <header>
+    <div class="eyebrow" data-i18n="app.name">Journal</div>
+    <h1 id="dateTitle" data-i18n="common.today">Today</h1>
+    <div class="streak-badge" id="streakBadge"></div>
+  </header>
+
+  <div class="install-banner" id="installBanner">
+    <div class="ib-text" id="installBannerText"><strong data-i18n="banners.installTitle">Install the app</strong><br><span data-i18n="banners.installText">Get your own icon and open the app without a browser bar.</span></div>
+    <div style="display:flex; gap:6px;">
+      <button id="installBtn" data-i18n="banners.installBtn">Install</button>
+      <button class="ib-dismiss" id="installDismissBtn" data-i18n="banners.installDismiss">Not now</button>
+    </div>
+  </div>
+
+  <div class="update-banner" id="updateBanner">
+    <div class="ib-text">🔄 <span data-i18n="banners.updateText">A new version of the app is available.</span></div>
+    <button id="updateReloadBtn" data-i18n="banners.updateBtn">Update</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="home" data-i18n="tabs.home">🏠 Home</button>
+    <button class="tab-btn" data-tab="write" data-i18n="tabs.write">✍️ Write</button>
+    <button class="tab-btn" data-tab="calendar" data-i18n="tabs.calendar">📅 Calendar</button>
+    <button class="tab-btn" data-tab="search" data-i18n="tabs.search">🔍 Search</button>
+    <button class="tab-btn" data-tab="stats" data-i18n="tabs.stats">📊 Stats</button>
+    <button class="tab-btn" data-tab="life" data-i18n="tabs.life">🗓️ Life</button>
+    <button class="tab-btn" data-tab="wrapped" data-i18n="tabs.wrapped">🎁 Wrapped</button>
+  </div>
+
+  <div class="view active" id="viewHome">
+    <div id="greetingBox" class="home-greeting"></div>
+
+    <section class="card" id="todayStatusCard"></section>
+
+    <section class="card">
+      <h2 data-i18n="home.streakHeader">🔥 Streak</h2>
+      <div id="streakProgressBox"></div>
+    </section>
+
+    <div class="two-col" style="margin-bottom:14px;">
+      <section class="card" style="margin-bottom:0;">
+        <h2 data-i18n="home.latestMoodHeader">🙂 Latest mood</h2>
+        <div id="latestMoodBox"></div>
+      </section>
+      <section class="card" style="margin-bottom:0;">
+        <h2 data-i18n="home.weekTrendHeader">📈 Weekly trend</h2>
+        <div id="weekTrendBox"></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2 data-i18n="home.goalHeader">🎯 Today's goal</h2>
+      <div id="todaysGoalBox"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.reflectionHeader">💬 Today's reflection question</h2>
+      <div id="reflectionQBox"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.yesterdayHeader">📆 Yesterday</h2>
+      <div id="yesterdayBox"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.recentHeader">🕓 Recent entries</h2>
+      <div class="history-list" id="recentList"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.favoritesHeader">⭐ Favorites</h2>
+      <div class="history-list" id="favList"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.randomMemoryHeader">🎲 Random memory</h2>
+      <div id="randomMemoryBox"></div>
+      <button class="export-btn" id="rerollMemoryBtn" style="margin-top:10px;" data-i18n="home.rerollButton">New memory</button>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.throwbackHeader">❤️ This day, in past years</h2>
+      <div class="history-list" id="throwbackMultiList"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.insightsHeader">💡 Insights</h2>
+      <div id="insightsBox"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.milestonesHeader">🏅 Milestones</h2>
+      <div class="milestone-grid" id="milestonesGrid"></div>
+    </section>
+  </div>
+
+  <div class="view" id="viewWrite">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <input type="date" class="date-picker" id="datePicker">
+      <button class="fav-toggle" id="favToggleBtn" data-i18n-title="write.favToggleTitle" title="Mark as favorite">☆</button>
+    </div>
+    <div class="autosave-indicator" id="autosaveIndicator"></div>
+
+    <div class="trail-wrap">
+      <div class="trail-label" data-i18n="write.monthTrail">Your month in color</div>
+      <div class="trail" id="trail"></div>
+    </div>
+
+    <div id="throwbackWrap"></div>
+
+    <section class="card">
+      <h2 data-i18n="write.moodQuestion">How are you feeling today?</h2>
+      <div class="mood-grid" id="moodGrid"></div>
+    </section>
+
+    <section class="card"><h2 data-i18n="write.feelingsHeader">😊 Feelings</h2><div class="chips" id="feelingsChips"></div></section>
+
+    <section class="card">
+      <h2 data-i18n="write.gratitudeHeader">🙏 3 things I'm grateful for</h2>
+      <input type="text" class="gratitude-input" id="grat0" data-i18n-placeholder="write.gratitude1" placeholder="1.">
+      <input type="text" class="gratitude-input" id="grat1" data-i18n-placeholder="write.gratitude2" placeholder="2.">
+      <input type="text" class="gratitude-input" id="grat2" data-i18n-placeholder="write.gratitude3" placeholder="3." style="margin-bottom:0;">
+    </section>
+
+    <section class="card"><h2 data-i18n="write.sleepHeader">😴 Sleep</h2><div class="chips" id="sleepChips"></div></section>
+    <section class="card"><h2 data-i18n="write.energyHeader">⚡ Energy level</h2><div class="chips" id="energyChips"></div></section>
+    <section class="card"><h2 data-i18n="write.healthHeader">💪 Physical activity</h2><div class="chips" id="healthChips"></div></section>
+    <section class="card"><h2 data-i18n="write.hobbiesHeader">🎯 Hobbies</h2><div class="chips" id="hobbyChips"></div></section>
+    <section class="card"><h2 data-i18n="write.foodHeader">🍽️ Food</h2><div class="chips" id="foodChips"></div></section>
+    <section class="card"><h2 data-i18n="write.socialHeader">👥 Social</h2><div class="chips" id="socialChips"></div></section>
+    <section class="card"><h2 data-i18n="write.relationsHeader">❤️ Who did you see today?</h2><div class="chips" id="relationsChips"></div></section>
+    <section class="card"><h2 data-i18n="write.placesHeader">📍 Where were you today?</h2><div class="chips" id="placesChips"></div></section>
+    <section class="card"><h2 data-i18n="write.selfHeader">🌱 Better self today</h2><div class="chips" id="selfChips"></div></section>
+    <section class="card"><h2 data-i18n="write.choresHeader">🧹 Chores</h2><div class="chips" id="choreChips"></div></section>
+    <section class="card"><h2 data-i18n="write.weatherHeader">🌤️ Weather</h2><div class="chips" id="weatherChips"></div></section>
+    <section class="card"><h2 data-i18n="write.beautyHeader">💅 Self-care</h2><div class="chips" id="beautyChips"></div></section>
+
+    <section class="card">
+      <h2 data-i18n="write.highlightLowlightHeader">🌟 Highlight & lowlight</h2>
+      <label class="field-label" data-i18n="write.highlightLabel">Today's highlight</label>
+      <input type="text" class="plain" id="highlightInput" data-i18n-placeholder="write.highlightPlaceholder" placeholder="What was the best part of today?" style="margin-bottom:14px;">
+      <label class="field-label" data-i18n="write.lowlightLabel">Today's lowlight</label>
+      <input type="text" class="plain" id="lowlightInput" data-i18n-placeholder="write.lowlightPlaceholder" placeholder="What was the hardest part of today?">
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="write.tomorrowHeader">🎯 Tomorrow I want to...</h2>
+      <input type="text" class="plain" id="tomorrowInput" data-i18n-placeholder="write.tomorrowPlaceholder" placeholder="A focus for tomorrow">
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="write.screenMoneyHeader">📱 Screen time & 💰 Spending</h2>
+      <div class="two-col">
+        <div>
+          <label class="field-label" data-i18n="write.screenTimeLabel">Screen time (hours)</label>
+          <input type="number" class="plain" id="screenTimeInput" placeholder="e.g. 4" min="0" step="0.5">
+        </div>
+        <div>
+          <label class="field-label" data-i18n="write.moneyLabel">Money spent</label>
+          <input type="number" class="plain" id="moneyInput" placeholder="e.g. 150" min="0">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="write.stepsHeader">🚶 Steps</h2>
+      <div class="steps-row">
+        <input type="number" id="stepsInput" data-i18n-placeholder="write.stepsPlaceholder" placeholder="e.g. 8500" min="0">
+      </div>
+      <div class="steps-hint" data-i18n="write.stepsHint">There's unfortunately no direct connection to Apple Health from here.</div>
+    </section>
+
+    <section class="card">
+      <h2><span data-i18n="write.photoHeader">📷 Photos</span> <span id="photoCount" class="photo-count-badge"></span></h2>
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <div class="photo-drop" id="photoDrop">
+        <span data-i18n="write.photoChooseMulti">Tap to add photos — you can select several at once</span>
+        <input type="file" accept="image/*" id="photoInput" multiple>
+      </div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 data-i18n="write.notesHeader" style="margin:0;">📝 Notes</h2>
+        <button type="button" class="focus-mode-btn" id="focusModeBtn">🖋️ <span data-i18n="write.focusModeButton">Focus mode</span></button>
+      </div>
+      <textarea id="notes" data-i18n-placeholder="write.notesPlaceholder" placeholder="Write freely about your day, thoughts, anything at all..." style="margin-top:10px;"></textarea>
+      <div class="word-meter-wrap">
+        <div class="word-meter-label"><span id="wordCount">0</span><span data-i18n="write.wordCountGoal">Goal: 1000 words</span></div>
+        <div class="word-meter-track"><div class="word-meter-fill" id="wordFill" style="width:0%"></div></div>
+      </div>
+    </section>
+
+    <div class="save-bar">
+      <button class="save-btn" id="saveBtn" data-i18n="write.saveButton">Save today's entry</button>
+      <div class="save-status" id="saveStatus"></div>
+      <button type="button" class="delete-entry-btn" id="deleteEntryBtn">🗑️ <span data-i18n="write.deleteButton">Delete this entry</span></button>
+    </div>
+  </div>
+
+  <div class="view" id="viewCalendar">
+    <section class="card">
+      <div class="cal-nav">
+        <button id="calPrev">‹</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button id="calNext">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </section>
+    <section class="card">
+      <h2 data-i18n="calendar.historyHeader">History this month</h2>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </div>
+
+  <div class="view" id="viewSearch">
+    <section class="card">
+      <h2 data-i18n="search.header">🔍 Search your journal</h2>
+      <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="search.placeholder" placeholder="Search by word, feeling, activity...">
+      <div class="history-list" id="searchResults"></div>
+    </section>
+  </div>
+
+  <div class="view" id="viewStats">
+    <section class="card">
+      <h2 data-i18n="stats.moodHeader">How you've been feeling overall</h2>
+      <div class="stat-toggle" id="moodViewToggle">
+        <button data-view="chart" class="active" data-i18n="stats.chartBtn">📊 Chart</button>
+        <button data-view="table" data-i18n="stats.tableBtn">📋 Table</button>
+      </div>
+      <div id="moodStats"></div>
+    </section>
+    <section class="card">
+      <h2 data-i18n="stats.topHeader">🏆 Most common</h2>
+      <div id="topStats"></div>
+    </section>
+    <section class="card">
+      <h2 data-i18n="stats.insightsHeader">💡 Insights</h2>
+      <div id="statsInsightsBox"></div>
+    </section>
+    <section class="card">
+      <h2 data-i18n="settings.languageHeader">🌐 Language</h2>
+      <div id="languageSwitchArea"></div>
+    </section>
+    <section class="card">
+      <h2 data-i18n="stats.securityHeader">🔐 Security</h2>
+      <div id="pinChangeArea"></div>
+    </section>
+    <section class="card">
+      <h2 data-i18n="stats.backupHeader">💾 Backup</h2>
+      <p class="sub" data-i18n="stats.backupText">Download all your entries as a JSON file.</p>
+      <button class="export-btn" id="exportBtn" data-i18n="stats.exportButton">Export all data</button>
+    </section>
+  </div>
+
+  <div class="view" id="viewLife">
+    <div id="lifeSetupBox"></div>
+    <div id="lifeContent" style="display:none;">
+      <div class="cal-nav" id="lifeNav" style="display:none;">
+        <button id="lifeBackBtn">‹</button>
+        <div class="cal-title" id="lifeYearTitle"></div>
+        <div style="width:36px;"></div>
+      </div>
+      <section class="card">
+        <div id="lifeGridWrap"></div>
+        <div class="life-legend" id="lifeLegend"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="view" id="viewWrapped">
+    <div class="cal-nav" style="margin-bottom:16px;">
+      <button id="wrappedPrevYear">‹</button>
+      <div class="cal-title" id="wrappedYearTitle"></div>
+      <button id="wrappedNextYear">›</button>
+    </div>
+    <div id="wrappedContent"></div>
+  </div>
+</div>
+
+<!-- Translations must load before the i18n engine and app logic -->
+<script src="translations/en.js"></script>
+<script src="translations/sv.js"></script>
+<script src="utils/i18n.js"></script>
+<script src="utils/storage.js"></script>
+<script src="utils/imageStore.js"></script>
+<script src="components/onboarding.js"></script>
+<script src="components/settings.js"></script>
+<script src="components/gallery.js"></script>
+<script src="components/focusMode.js"></script>
+<script src="components/confirmDialog.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
