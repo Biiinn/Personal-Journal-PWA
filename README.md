@@ -8,6 +8,8 @@ Try the application here:
 [Open Personal Journal PWA](https://biiinn.github.io/Personal-Journal-PWA/)
 
 
+
+
 ![screenshot placeholder: Home dashboard](docs/screenshots/home.png)
 ![screenshot placeholder: Write entry view](docs/screenshots/write.png)
 ![screenshot placeholder: Life calendar](docs/screenshots/life-calendar.png)
