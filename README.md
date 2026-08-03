@@ -7,7 +7,7 @@ A privacy-first personal journal you can run entirely on your own device. No acc
 ![screenshot placeholder: Life calendar](docs/screenshots/life-calendar.png)
 ![screenshot placeholder: Wrapped annual report](docs/screenshots/wrapped.png)
 
-> Screenshots above are placeholders — drop your own into `docs/screenshots/` and update the paths.
+
 
 ## Features
 
