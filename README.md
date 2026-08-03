@@ -5,8 +5,8 @@ A privacy-first personal journal you can run entirely on your own device. No acc
 ## 🚀 Live Demo
 
 Try the application here:
-
 [Open Personal Journal PWA](https://biiinn.github.io/Personal-Journal-PWA/)
+
 
 ![screenshot placeholder: Home dashboard](docs/screenshots/home.png)
 ![screenshot placeholder: Write entry view](docs/screenshots/write.png)
