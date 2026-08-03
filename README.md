@@ -1,6 +1,12 @@
 # Journal — a personal, private, installable journaling app
 
-A privacy-first personal journal you can run entirely on your own device. No account, no server, no tracking — your entries never leave your browser's local storage. Built as a installable Progressive Web App (PWA), fully bilingual (English/Swedish), and ready to run straight from GitHub with zero configuration.
+A privacy-first personal journal you can run entirely on your own device. No account, no server, no tracking — your entries never leave your browser's local storage. Built as an installable Progressive Web App (PWA), fully bilingual (English/Swedish), and ready to run straight from GitHub with zero configuration.
+
+## 🚀 Live Demo
+
+Try the application here:
+
+[Open Personal Journal PWA](https://biiinn.github.io/Personal-Journal-PWA/)
 
 ![screenshot placeholder: Home dashboard](docs/screenshots/home.png)
 ![screenshot placeholder: Write entry view](docs/screenshots/write.png)
